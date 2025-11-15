@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFTCollection on ARC</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎨 NFTCollection on ARC</h1>
+        <div class="wallet-section">
+            <button id="connectWallet">Connect Wallet</button>
+            <button id="disconnectWallet" style="display: none;">Disconnect</button>
+            <span id="walletInfo"></span>
+        </div>
+    </header>
+
+    <main>
+        <div class="info-section">
+            <div class="balance-info">
+                <p>EURC Balance: <span id="eurcBalance">0</span></p>
+                <p>Total Supply: <span id="totalSupply">12000</span> | Minted: <span id="mintedCount">0</span></p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+            <div class="description">
+                <h3>About Collection</h3>
+                <p>• 12 Unique Animated NFTs</p>
+                <p>• 10 EURC per NFT</p>
+                <p>• 50% of EURC Burned 🔥</p>
+                <p>• 50% to Treasury 💰</p>
+                <p>• Max 12 NFTs per wallet</p>
+            </div>
+        </div>
+
+        <div class="nft-grid" id="nftGrid">
+            <!-- NFTs dynamically loaded here -->
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
