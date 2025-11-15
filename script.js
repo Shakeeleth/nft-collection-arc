@@ -1,4 +1,5 @@
-// script.js
+// script.js - Full Upgraded Version with Lazy Load, Skeleton, Animations
+
 // Contract Addresses
 const NFT_CONTRACT_ADDRESS = '0xe78B7c61B73FE0FBa08dFCd0d413aab465d0D520';
 const EURC_TOKEN_ADDRESS = '0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a';
@@ -7,7 +8,7 @@ const EURC_TOKEN_ADDRESS = '0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a';
 const ARC_RPC = 'https://rpc.testnet.arc.network';
 const CHAIN_ID = 5042002;
 
-// Contract ABIs
+// Contract ABIs (Full from your original)
 const NFT_ABI = [
     {
         "inputs": [
@@ -83,7 +84,7 @@ let nftContract;
 let eurcContract;
 let userAddress;
 
-// NFT Data with Pinata Links
+// NFT Data with Pinata Links (Full from original)
 const nftData = [
     { 
         id: 1, 
@@ -161,17 +162,36 @@ const nftData = [
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', function() {
+    showSkeleton();
     initializeApp();
-    loadNFTs();
+    setupEventListeners();
+    loadNFTsWithLazyLoad();
 });
+
+// Show Skeleton Loaders
+function showSkeleton() {
+    const nftGrid = document.getElementById('nftGrid');
+    nftGrid.innerHTML = Array.from({length: 12}, (_, i) => `
+        <div class="nft-card skeleton-card">
+            <div class="skeleton-video"></div>
+            <div class="nft-info">
+                <div class="skeleton-text" style="width: 80%; margin-bottom: 1rem;"></div>
+                <div class="skeleton-text" style="width: 60%; margin-bottom: 1rem;"></div>
+                <div class="skeleton-text" style="width: 100%; height: 40px; margin-bottom: 1rem;"></div>
+                <div class="skeleton-text" style="width: 70%;"></div>
+            </div>
+        </div>
+    `).join('');
+}
 
 // Initialize Web3
 async function initializeApp() {
     if (typeof window.ethereum !== 'undefined') {
         web3 = new Web3(window.ethereum);
         await initializeContracts();
+        await updateBalances(); // Initial balance check
     } else {
-        alert('Please install MetaMask!');
+        showMessage('Please install MetaMask to continue!', 'error');
     }
 }
 
@@ -180,22 +200,40 @@ async function initializeContracts() {
     try {
         nftContract = new web3.eth.Contract(NFT_ABI, NFT_CONTRACT_ADDRESS);
         eurcContract = new web3.eth.Contract(EURC_ABI, EURC_TOKEN_ADDRESS);
-        console.log('Contracts initialized');
+        console.log('Contracts initialized successfully');
+        await updateMintCounts(); // Load mint counts after init
     } catch (error) {
         console.error('Error initializing contracts:', error);
+        showMessage('Failed to initialize contracts', 'error');
     }
 }
 
-// Load NFTs to Grid
-function loadNFTs() {
-    const nftGrid = document.getElementById('nftGrid');
-    nftGrid.innerHTML = '';
+// Setup Event Listeners
+function setupEventListeners() {
+    document.getElementById('connectWallet').addEventListener('click', connectWallet);
+    document.getElementById('disconnectWallet').addEventListener('click', disconnectWallet);
 
-    nftData.forEach(nft => {
-        const nftCard = `
-            <div class="nft-card">
-                <video class="nft-video" autoplay loop muted playsinline>
-                    <source src="${nft.video}" type="video/mp4">
+    // MetaMask listeners
+    if (window.ethereum) {
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
+        window.ethereum.on('chainChanged', handleChainChanged);
+    }
+}
+
+// Load NFTs with Lazy Loading
+function loadNFTsWithLazyLoad() {
+    const nftGrid = document.getElementById('nftGrid');
+    nftGrid.innerHTML = ''; // Clear skeleton after delay for effect
+
+    setTimeout(() => { // Small delay for smooth transition
+        nftData.forEach((nft, index) => {
+            const nftCard = document.createElement('div');
+            nftCard.className = 'nft-card';
+            nftCard.style.opacity = '0';
+            nftCard.style.transform = 'translateY(30px)';
+            nftCard.innerHTML = `
+                <video class="nft-video lazy-video" loop muted playsinline preload="none" data-src="${nft.video}">
+                    <source data-src="${nft.video}" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
                 <div class="nft-info">
@@ -206,20 +244,36 @@ function loadNFTs() {
                         Mint NFT
                     </button>
                     <p class="mint-count" id="mintCount${nft.id}">Minted: 0/1000</p>
+                    <div class="type-progress">
+                        <div class="type-fill" id="typeFill${nft.id}"></div>
+                    </div>
                 </div>
-            </div>
-        `;
-        nftGrid.innerHTML += nftCard;
-    });
+            `;
+            nftGrid.appendChild(nftCard);
+
+            // Lazy load video with IntersectionObserver
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const video = entry.target.querySelector('.lazy-video');
+                        video.src = video.dataset.src;
+                        video.querySelector('source').src = video.dataset.src;
+                        video.load();
+                        video.play().catch(e => console.log('Autoplay prevented'));
+                        nftCard.style.opacity = '1';
+                        nftCard.style.transform = 'translateY(0)';
+                        nftCard.style.transition = 'all 0.8s ease';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '50px' });
+
+            observer.observe(nftCard);
+        });
+    }, 500);
 }
 
 // Connect Wallet
-document.getElementById('connectWallet').addEventListener('click', connectWallet);
-
-// Disconnect Wallet
-document.getElementById('disconnectWallet').addEventListener('click', disconnectWallet);
-
-// Connect Wallet Function
 async function connectWallet() {
     try {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -232,13 +286,13 @@ async function connectWallet() {
         await updateMintCounts();
         
         document.getElementById('connectWallet').style.display = 'none';
-        document.getElementById('disconnectWallet').style.display = 'block';
+        document.getElementById('disconnectWallet').style.display = 'inline-block';
         
-        showMessage('Wallet connected successfully!', 'success');
+        showMessage('Wallet connected successfully! Welcome to ArcNFTCollection.', 'success');
         
     } catch (error) {
         console.error('Error connecting wallet:', error);
-        showMessage('Error connecting wallet', 'error');
+        showMessage('Error connecting wallet: ' + error.message, 'error');
     }
 }
 
@@ -258,17 +312,16 @@ async function switchToArcNetwork() {
                         chainId: web3.utils.toHex(CHAIN_ID),
                         chainName: 'Arc Testnet',
                         rpcUrls: [ARC_RPC],
-                        nativeCurrency: {
-                            name: 'USDC',
-                            symbol: 'USDC',
-                            decimals: 18
-                        },
+                        nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
                         blockExplorerUrls: ['https://testnet.arcscan.app/']
                     }],
                 });
             } catch (addError) {
-                console.error('Error adding network:', addError);
+                console.error('Error adding Arc network:', addError);
+                showMessage('Failed to add Arc Testnet. Please add manually.', 'error');
             }
+        } else {
+            throw switchError;
         }
     }
 }
@@ -276,12 +329,12 @@ async function switchToArcNetwork() {
 // Disconnect Wallet
 function disconnectWallet() {
     userAddress = null;
-    document.getElementById('connectWallet').style.display = 'block';
+    document.getElementById('connectWallet').style.display = 'inline-block';
     document.getElementById('disconnectWallet').style.display = 'none';
     document.getElementById('walletInfo').textContent = '';
-    document.getElementById('eurcBalance').textContent = '0';
+    document.getElementById('eurcBalance').textContent = '0.00';
     
-    showMessage('Wallet disconnected', 'success');
+    showMessage('Wallet disconnected.', 'success');
 }
 
 // Update Wallet Info
@@ -294,39 +347,38 @@ async function updateWalletInfo() {
 
 // Update Balances
 async function updateBalances() {
-    if (userAddress) {
-        try {
-            const eurcBalance = await eurcContract.methods.balanceOf(userAddress).call();
-            document.getElementById('eurcBalance').textContent = (eurcBalance / 1e6).toFixed(2);
-        } catch (error) {
-            console.error('Error updating balances:', error);
-        }
+    if (!userAddress) return;
+    try {
+        const eurcBalance = await eurcContract.methods.balanceOf(userAddress).call();
+        document.getElementById('eurcBalance').textContent = (eurcBalance / 1e6).toFixed(2);
+    } catch (error) {
+        console.error('Error updating balances:', error);
     }
 }
 
-// Update Mint Counts
+// Update Mint Counts with Progress Bars
 async function updateMintCounts() {
+    if (!nftContract) return;
     try {
         let totalMinted = 0;
         
         for (let i = 1; i <= 12; i++) {
             const minted = await nftContract.methods.getMintedCountPerType(i).call();
-            document.getElementById(`mintCount${i}`).textContent = `Minted: ${minted}/1000`;
+            const countEl = document.getElementById(`mintCount${i}`);
+            const fillEl = document.getElementById(`typeFill${i}`);
+            if (countEl && fillEl) {
+                countEl.textContent = `Minted: ${minted}/1000`;
+                fillEl.style.width = `${(minted / 1000) * 100}%`;
+            }
             totalMinted += parseInt(minted);
         }
         
         document.getElementById('mintedCount').textContent = totalMinted;
-        updateProgressBar(totalMinted);
+        document.getElementById('progressFill').style.width = `${(totalMinted / 12000) * 100}%`;
         
     } catch (error) {
         console.error('Error updating mint counts:', error);
     }
-}
-
-// Update Progress Bar
-function updateProgressBar(minted) {
-    const progress = (minted / 12000) * 100;
-    document.getElementById('progressFill').style.width = `${progress}%`;
 }
 
 // Mint NFT Function
@@ -337,6 +389,7 @@ async function mintNFT(nftType) {
     }
 
     const mintButton = document.getElementById(`mintBtn${nftType}`);
+    const originalText = mintButton.textContent;
     mintButton.disabled = true;
     mintButton.textContent = 'Minting...';
 
@@ -344,21 +397,20 @@ async function mintNFT(nftType) {
         // Check EURC balance
         const eurcBalance = await eurcContract.methods.balanceOf(userAddress).call();
         const requiredAmount = 10 * 1e6;
-
-        if (eurcBalance < requiredAmount) {
-            throw new Error('Insufficient EURC balance');
+        if (parseInt(eurcBalance) < requiredAmount) {
+            throw new Error('Insufficient EURC balance. Need at least 10 EURC.');
         }
 
-        // Check if approval is needed
+        // Check allowance
         const allowance = await eurcContract.methods.allowance(userAddress, NFT_CONTRACT_ADDRESS).call();
-        if (allowance < requiredAmount) {
+        if (parseInt(allowance) < requiredAmount) {
             await approveEURC();
         }
 
-        // Mint NFT
-        await nftContract.methods.mintNFT(nftType).send({ from: userAddress });
+        // Mint the NFT
+        const tx = await nftContract.methods.mintNFT(nftType).send({ from: userAddress });
         
-        showMessage(`NFT #${nftType} minted successfully!`, 'success');
+        showMessage(`🎉 NFT #${nftType} minted successfully! Tx: ${tx.transactionHash.substring(0, 10)}...`, 'success');
         await updateBalances();
         await updateMintCounts();
         
@@ -367,37 +419,43 @@ async function mintNFT(nftType) {
         showMessage(`Minting failed: ${error.message}`, 'error');
     } finally {
         mintButton.disabled = false;
-        mintButton.textContent = 'Mint NFT';
+        mintButton.textContent = originalText;
     }
 }
 
 // Approve EURC
 async function approveEURC() {
     try {
-        const amount = '115792089237316195423570985008687907853269984665640564039457584007913129639935'; // Max approval
-        await eurcContract.methods.approve(NFT_CONTRACT_ADDRESS, amount).send({ from: userAddress });
-        showMessage('EURC approval successful!', 'success');
+        const maxAmount = '115792089237316195423570985008687907853269984665640564039457.584007913129639935'; // uint256 max
+        const tx = await eurcContract.methods.approve(NFT_CONTRACT_ADDRESS, maxAmount).send({ from: userAddress });
+        showMessage('EURC approval successful! You can now mint.', 'success');
+        return tx;
     } catch (error) {
-        throw new Error('EURC approval failed');
+        console.error('EURC approval failed:', error);
+        throw new Error('EURC approval failed: ' + error.message);
     }
 }
 
-// Show Message
+// Show Message with Animation
 function showMessage(message, type) {
     const messageDiv = document.createElement('div');
-    messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+    messageDiv.className = `${type}-message`;
     messageDiv.textContent = message;
-    messageDiv.style.display = 'block';
     
     document.body.appendChild(messageDiv);
     
+    // Trigger show animation
+    setTimeout(() => messageDiv.classList.add('show'), 100);
+    
+    // Remove after 5s
     setTimeout(() => {
-        messageDiv.remove();
+        messageDiv.classList.remove('show');
+        setTimeout(() => messageDiv.remove(), 300);
     }, 5000);
 }
 
-// Listen for account changes
-window.ethereum.on('accountsChanged', (accounts) => {
+// Handle MetaMask Events
+function handleAccountsChanged(accounts) {
     if (accounts.length === 0) {
         disconnectWallet();
     } else {
@@ -406,15 +464,15 @@ window.ethereum.on('accountsChanged', (accounts) => {
         updateBalances();
         updateMintCounts();
     }
-});
+}
 
-// Listen for chain changes
-window.ethereum.on('chainChanged', (chainId) => {
-    if (parseInt(chainId) !== CHAIN_ID) {
-        showMessage('Please switch to Arc Testnet', 'error');
+function handleChainChanged(chainId) {
+    const chainIdInt = parseInt(chainId, 16);
+    if (chainIdInt !== CHAIN_ID) {
+        showMessage('Please switch to Arc Testnet to mint NFTs.', 'error');
     } else {
         initializeContracts();
         updateBalances();
         updateMintCounts();
     }
-});
+}
