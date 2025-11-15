@@ -1,4 +1,4 @@
-// script.js - FINAL VERSION (November 15, 2025) - All Videos Fixed + Super Fast
+// script.js - FINAL VERSION (November 15, 2025) - GitHub Videos + Smooth Animation Load
 
 const NFT_CONTRACT_ADDRESS = '0xe78B7c61B73FE0FBa08dFCd0d413aab465d0D520';
 const EURC_TOKEN_ADDRESS = '0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a';
@@ -23,20 +23,20 @@ const EURC_ABI = [
 // Global vars
 let web3, nftContract, eurcContract, userAddress;
 
-// ALL VIDEOS NOW ON AWS S3 (Zero CORS, Super Fast India Region)
+// NFT Data with GitHub Paths (super fast, no CORS)
 const nftData = [
-    { id: 1, name: "Cyberpunk Coffee", video: "https://nft-collection-arc.s3.ap-south-1.amazonaws.com/1-cyberpunk-coffee.mp4", description: "Futuristic cyberpunk coffee scene" },
-    { id: 2, name: "Bumbfounded", video: "https://nft-collection-arc.s3.ap-south-1.amazonaws.com/2-bumbfounded.mp4", description: "Surprising animated moment" },
-    { id: 3, name: "Storyboard", video: "https://nft-collection-arc.s3.ap-south-1.amazonaws.com/3-storyboard.mp4", description: "Creative storyboard process" },
-    { id: 4, name: "Energy Lights", video: "https://nft-collection-arc.s3.ap-south-1.amazonaws.com/4-energy-lights.mp4", description: "Vibrant energy lights in motion" },
-    { id: 5, name: "Digital Abstract", video: "https://nft-collection-arc.s3.ap-south-1.amazonaws.com/5-digital-abstract.mp4", description: "Abstract digital art creation" },
-    { id: 6, name: "AI Prompt", video: "https://nft-collection-arc.s3.ap-south-1.amazonaws.com/6-ai-prompt.mp4", description: "AI generated visualization" },
-    { id: 7, name: "Muscle Rat", video: "https://nft-collection-arc.s3.ap-south-1.amazonaws.com/7-muscle-rat.mp4", description: "Strong rodent character animation" },
-    { id: 8, name: "The Storm", video: "https://nft-collection-arc.s3.ap-south-1.amazonaws.com/8-the-storm.mp4", description: "Powerful storm weather animation" },
-    { id: 9, name: "Origami Bunny", video: "https://nft-collection-arc.s3.ap-south-1.amazonaws.com/9-origami-bunny.mp4", description: "Paper origami bunny animation" },
-    { id: 10, name: "Urban Leans", video: "https://nft-collection-arc.s3.ap-south-1.amazonaws.com/10-urban-leans.mp4", description: "Urban style leaning animation" },
-    { id: 11, name: "Futuristic Robots", video: "https://nft-collection-arc.s3.ap-south-1.amazonaws.com/11-futuristic-robots.mp4", description: "Two humanoid robots futuristic setting" },
-    { id: 12, name: "Point of View", video: "https://nft-collection-arc.s3.ap-south-1.amazonaws.com/12-point-of-view.mp4", description: "First person perspective animation" }
+    { id: 1, name: "Cyberpunk Coffee", video: "./nft-videos/1-cyberpunk-coffee.mp4", description: "Futuristic cyberpunk coffee scene" },
+    { id: 2, name: "Bumbfounded", video: "./nft-videos/2-bumbfounded.mp4", description: "Surprising animated moment" },
+    { id: 3, name: "Storyboard", video: "./nft-videos/3-storyboard.mp4", description: "Creative storyboard process" },
+    { id: 4, name: "Energy Lights", video: "./nft-videos/4-energy-lights.mp4", description: "Vibrant energy lights in motion" },
+    { id: 5, name: "Digital Abstract", video: "./nft-videos/5-digital-abstract.mp4", description: "Abstract digital art creation" },
+    { id: 6, name: "AI Prompt", video: "./nft-videos/6-ai-prompt.mp4", description: "AI generated visualization" },
+    { id: 7, name: "Muscle Rat", video: "./nft-videos/7-muscle-rat.mp4", description: "Strong rodent character animation" },
+    { id: 8, name: "The Storm", video: "./nft-videos/8-the-storm.mp4", description: "Powerful storm weather animation" },
+    { id: 9, name: "Origami Bunny", video: "./nft-videos/9-origami-bunny.mp4", description: "Paper origami bunny animation" },
+    { id: 10, name: "Urban Leans", video: "./nft-videos/10-urban-leans.mp4", description: "Urban style leaning animation" },
+    { id: 11, name: "Futuristic Robots", video: "./nft-videos/11-futuristic-robots.mp4", description: "Two humanoid robots futuristic setting" },
+    { id: 12, name: "Point of View", video: "./nft-videos/12-point-of-view.mp4", description: "First person perspective animation" }
 ];
 
 // DOM Loaded
@@ -44,10 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
     showSkeleton();
     initializeApp();
     setupEventListeners();
-    loadNFTsWithLazyLoad();
+    loadNFTsWithAnimation();
 });
 
-// Skeleton
+// Skeleton Loader
 function showSkeleton() {
     const grid = document.getElementById('nftGrid');
     grid.innerHTML = Array(12).fill().map(() => `
@@ -63,7 +63,7 @@ function showSkeleton() {
     `).join('');
 }
 
-// Initialize
+// Initialize App
 async function initializeApp() {
     if (typeof window.ethereum !== 'undefined') {
         web3 = new Web3(window.ethereum);
@@ -78,27 +78,33 @@ async function initializeContracts() {
         nftContract = new web3.eth.Contract(NFT_ABI, NFT_CONTRACT_ADDRESS);
         eurcContract = new web3.eth.Contract(EURC_ABI, EURC_TOKEN_ADDRESS);
         await updateMintCounts();
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error('Contract init error:', e); }
 }
 
 function setupEventListeners() {
     document.getElementById('connectWallet').onclick = connectWallet;
     document.getElementById('disconnectWallet').onclick = disconnectWallet;
-    window.ethereum?.on('accountsChanged', handleAccountsChanged);
-    window.ethereum?.on('chainChanged', () => window.location.reload());
+    if (window.ethereum) {
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
+        window.ethereum.on('chainChanged', () => window.location.reload());
+    }
 }
 
-// Lazy Load NFTs
-function loadNFTsWithLazyLoad() {
+// Load NFTs with Animation (No Play Button - Direct Loop on Scroll/Hover)
+function loadNFTsWithAnimation() {
     const grid = document.getElementById('nftGrid');
     setTimeout(() => {
         grid.innerHTML = '';
-        nftData.forEach(nft => {
+        nftData.forEach((nft, index) => {
             const card = document.createElement('div');
             card.className = 'nft-card';
             card.style.opacity = '0';
+            card.style.transform = 'translateY(50px)';
             card.innerHTML = `
-                <video class="nft-video lazy-video" loop muted playsinline preload="none" data-src="${nft.video}"></video>
+                <video class="nft-video lazy-video" loop muted playsinline preload="metadata" data-src="${nft.video}">
+                    <source data-src="${nft.video}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
                 <div class="nft-info">
                     <h3>${nft.name}</h3>
                     <p>${nft.description}</p>
@@ -110,23 +116,34 @@ function loadNFTsWithLazyLoad() {
             `;
             grid.appendChild(card);
 
+            // Smooth Animation Load with IntersectionObserver
             const observer = new IntersectionObserver(entries => {
-                if (entries[0].isIntersecting) {
-                    const video = card.querySelector('.lazy-video');
-                    video.src = nft.video;
-                    video.load();
-                    video.play().catch(() => {});
-                    card.style.opacity = '1';
-                    card.style.transition = 'all 0.8s ease';
-                    observer.unobserve(card);
-                }
-            }, { rootMargin: '100px' });
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const video = entry.target.querySelector('.lazy-video');
+                        video.src = nft.video;
+                        video.querySelector('source').src = nft.video;
+                        video.load();
+                        // Start loop animation on load (no user interaction needed)
+                        video.addEventListener('loadeddata', () => {
+                            video.play().catch(() => {}); // Silent fail if blocked
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                            card.style.transition = `all 0.8s ease ${index * 0.1}s`; // Staggered animation
+                        });
+                        // Hover to restart loop for fresh animation feel
+                        video.addEventListener('mouseenter', () => video.currentTime = 0);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.2, rootMargin: '50px' });
+
             observer.observe(card);
         });
-    }, 600);
+    }, 800); // Slightly longer delay for dramatic skeleton fade
 }
 
-// Connect Wallet + Network Switch
+// Wallet Functions (same as before)
 async function connectWallet() {
     try {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -137,22 +154,30 @@ async function connectWallet() {
         await updateMintCounts();
         document.getElementById('connectWallet').style.display = 'none';
         document.getElementById('disconnectWallet').style.display = 'inline-block';
-        showMessage('Wallet connected successfully!', 'success');
+        showMessage('Wallet connected! Ready to mint on Arc.', 'success');
     } catch (e) { showMessage('Connection failed: ' + e.message, 'error'); }
 }
 
 async function switchToArcNetwork() {
     try {
-        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: web3.utils.toHex(CHAIN_ID) }] });
+        await window.ethereum.request({ 
+            method: 'wallet_switchEthereumChain', 
+            params: [{ chainId: web3.utils.toHex(CHAIN_ID) }] 
+        });
     } catch (e) {
         if (e.code === 4902) {
-            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{
-                chainId: web3.utils.toHex(CHAIN_ID),
-                chainName: 'Arc Testnet',
-                rpcUrls: [ARC_RPC],
-                nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
-                blockExplorerUrls: ['https://testnet.arcscan.app/']
-            }]});
+            await window.ethereum.request({ 
+                method: 'wallet_addEthereumChain', 
+                params: [{
+                    chainId: web3.utils.toHex(CHAIN_ID),
+                    chainName: 'Arc Testnet',
+                    rpcUrls: [ARC_RPC],
+                    nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
+                    blockExplorerUrls: ['https://testnet.arcscan.app/']
+                }] 
+            });
+        } else {
+            throw e;
         }
     }
 }
@@ -163,9 +188,9 @@ function disconnectWallet() {
     document.getElementById('disconnectWallet').style.display = 'none';
     document.getElementById('walletInfo').textContent = '';
     document.getElementById('eurcBalance').textContent = '0.00';
+    showMessage('Wallet disconnected.', 'success');
 }
 
-// Updates
 async function updateWalletInfo() {
     if (userAddress) {
         const short = `${userAddress.slice(0,6)}...${userAddress.slice(-4)}`;
@@ -174,11 +199,11 @@ async function updateWalletInfo() {
 }
 
 async function updateBalances() {
-    if (!userAddress) return;
+    if (!userAddress || !eurcContract) return;
     try {
         const bal = await eurcContract.methods.balanceOf(userAddress).call();
         document.getElementById('eurcBalance').textContent = (bal / 1e6).toFixed(2);
-    } catch (e) {}
+    } catch (e) { console.error('Balance update error:', e); }
 }
 
 async function updateMintCounts() {
@@ -191,50 +216,58 @@ async function updateMintCounts() {
             const fill = document.getElementById(`typeFill${i}`);
             if (el && fill) {
                 el.textContent = `Minted: ${minted}/1000`;
-                fill.style.width = `${(minted/1000)*100}%`;
+                fill.style.width = `${(minted / 1000) * 100}%`;
             }
             total += parseInt(minted);
-        } catch (e) {}
+        } catch (e) { console.error(`Count update error for ${i}:`, e); }
     }
-    document.getElementById('mintedCount').textContent = total;
-    document.getElementById('progressFill').style.width = `${(total/12000)*100}%`;
+    const mintedEl = document.getElementById('mintedCount');
+    if (mintedEl) mintedEl.textContent = total;
+    const progressEl = document.getElementById('progressFill');
+    if (progressEl) progressEl.style.width = `${(total / 12000) * 100}%`;
 }
 
-// Mint NFT
+// Mint Function
 async function mintNFT(type) {
     if (!userAddress) return showMessage('Connect wallet first!', 'error');
     const btn = document.getElementById(`mintBtn${type}`);
-    btn.disabled = true; btn.textContent = 'Minting...';
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Minting...';
     try {
         const bal = await eurcContract.methods.balanceOf(userAddress).call();
-        if (bal < 10e6) throw new Error('Need 10 EURC');
+        if (parseInt(bal) < 10 * 1e6) throw new Error('Need at least 10 EURC');
         let allowance = await eurcContract.methods.allowance(userAddress, NFT_CONTRACT_ADDRESS).call();
-        if (allowance < 10e6) await approveEURC();
-        await nftContract.methods.mintNFT(type).send({ from: userAddress });
-        showMessage(`NFT #${type} minted successfully!`, 'success');
+        if (parseInt(allowance) < 10 * 1e6) await approveEURC();
+        const tx = await nftContract.methods.mintNFT(type).send({ from: userAddress });
+        showMessage(`🎉 NFT #${type} minted! Tx: ${tx.transactionHash.slice(0, 10)}...`, 'success');
         await updateBalances();
         await updateMintCounts();
     } catch (e) {
         showMessage('Mint failed: ' + e.message, 'error');
     } finally {
-        btn.disabled = false; btn.textContent = 'Mint NFT';
+        btn.disabled = false;
+        btn.textContent = originalText;
     }
 }
 
 async function approveEURC() {
     const max = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
     await eurcContract.methods.approve(NFT_CONTRACT_ADDRESS, max).send({ from: userAddress });
-    showMessage('EURC approved!', 'success');
+    showMessage('EURC approved! Now mint away.', 'success');
 }
 
-// Message
+// Message System
 function showMessage(msg, type) {
     const div = document.createElement('div');
-    div.className = type + '-message';
+    div.className = `${type}-message`;
     div.textContent = msg;
     document.body.appendChild(div);
     setTimeout(() => div.classList.add('show'), 100);
-    setTimeout(() => { div.classList.remove('show'); setTimeout(() => div.remove(), 500); }, 5000);
+    setTimeout(() => {
+        div.classList.remove('show');
+        setTimeout(() => div.remove(), 300);
+    }, 5000);
 }
 
 function handleAccountsChanged(accounts) {
