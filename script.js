@@ -83,78 +83,78 @@ let nftContract;
 let eurcContract;
 let userAddress;
 
-// NFT Data with GitHub Raw Links
+// NFT Data with Pinata Links
 const nftData = [
     { 
         id: 1, 
         name: "Cyberpunk Coffee", 
-        video: "https://raw.githubusercontent.com/Shakeeleth/nft-collection-arc/main/nft-videos/1-cyberpunk-coffee.mp4", 
+        video: "https://gateway.pinata.cloud/ipfs/bafybeicpkt56ifv3k3w5ojukhuyd4i7ae6teh6qgmikds4ljg654yn2r64/1-cyberpunk-coffee.mp4", 
         description: "Futuristic cyberpunk coffee scene" 
     },
     { 
         id: 2, 
         name: "Bumbfounded", 
-        video: "https://raw.githubusercontent.com/Shakeeleth/nft-collection-arc/main/nft-videos/2-bumbfounded.mp4", 
+        video: "https://gateway.pinata.cloud/ipfs/bafybeicpkt56ifv3k3w5ojukhuyd4i7ae6teh6qgmikds4ljg654yn2r64/2-bumbfounded.mp4", 
         description: "Surprising animated moment" 
     },
     { 
         id: 3, 
         name: "Storyboard", 
-        video: "https://raw.githubusercontent.com/Shakeeleth/nft-collection-arc/main/nft-videos/3-storyboard.mp4", 
+        video: "https://gateway.pinata.cloud/ipfs/bafybeicpkt56ifv3k3w5ojukhuyd4i7ae6teh6qgmikds4ljg654yn2r64/3-storyboard.mp4", 
         description: "Creative storyboard process" 
     },
     { 
         id: 4, 
         name: "Energy Lights", 
-        video: "https://raw.githubusercontent.com/Shakeeleth/nft-collection-arc/main/nft-videos/4-energy-lights.mp4", 
+        video: "https://gateway.pinata.cloud/ipfs/bafybeicpkt56ifv3k3w5ojukhuyd4i7ae6teh6qgmikds4ljg654yn2r64/4-energy-lights.mp4", 
         description: "Vibrant energy lights in motion" 
     },
     { 
         id: 5, 
         name: "Digital Abstract", 
-        video: "https://raw.githubusercontent.com/Shakeeleth/nft-collection-arc/main/nft-videos/5-digital-abstract.mp4", 
+        video: "https://gateway.pinata.cloud/ipfs/bafybeicpkt56ifv3k3w5ojukhuyd4i7ae6teh6qgmikds4ljg654yn2r64/5-digital-abstract.mp4", 
         description: "Abstract digital art creation" 
     },
     { 
         id: 6, 
         name: "AI Prompt", 
-        video: "https://raw.githubusercontent.com/Shakeeleth/nft-collection-arc/main/nft-videos/6-ai-prompt.mp4", 
+        video: "https://gateway.pinata.cloud/ipfs/bafybeicpkt56ifv3k3w5ojukhuyd4i7ae6teh6qgmikds4ljg654yn2r64/6-ai-prompt.mp4", 
         description: "AI generated visualization" 
     },
     { 
         id: 7, 
         name: "Muscle Rat", 
-        video: "https://raw.githubusercontent.com/Shakeeleth/nft-collection-arc/main/nft-videos/7-muscle-rat.mp4", 
+        video: "https://gateway.pinata.cloud/ipfs/bafybeicpkt56ifv3k3w5ojukhuyd4i7ae6teh6qgmikds4ljg654yn2r64/7-muscle-rat.mp4", 
         description: "Strong rodent character animation" 
     },
     { 
         id: 8, 
         name: "The Storm", 
-        video: "https://raw.githubusercontent.com/Shakeeleth/nft-collection-arc/main/nft-videos/8-the-storm.mp4", 
+        video: "https://gateway.pinata.cloud/ipfs/bafybeicpkt56ifv3k3w5ojukhuyd4i7ae6teh6qgmikds4ljg654yn2r64/8-the-storm.mp4", 
         description: "Powerful storm weather animation" 
     },
     { 
         id: 9, 
         name: "Origami Bunny", 
-        video: "https://raw.githubusercontent.com/Shakeeleth/nft-collection-arc/main/nft-videos/9-origami-bunny.mp4", 
+        video: "https://gateway.pinata.cloud/ipfs/bafybeicpkt56ifv3k3w5ojukhuyd4i7ae6teh6qgmikds4ljg654yn2r64/9-origami-bunny.mp4", 
         description: "Paper origami bunny animation" 
     },
     { 
         id: 10, 
         name: "Urban Leans", 
-        video: "https://raw.githubusercontent.com/Shakeeleth/nft-collection-arc/main/nft-videos/10-urban-leans.mp4", 
+        video: "https://gateway.pinata.cloud/ipfs/bafybeicpkt56ifv3k3w5ojukhuyd4i7ae6teh6qgmikds4ljg654yn2r64/10-urban-leans.mp4", 
         description: "Urban style leaning animation" 
     },
     { 
         id: 11, 
         name: "Futuristic Robots", 
-        video: "https://raw.githubusercontent.com/Shakeeleth/nft-collection-arc/main/nft-videos/11-futuristic-robots.mp4", 
+        video: "https://gateway.pinata.cloud/ipfs/bafybeicpkt56ifv3k3w5ojukhuyd4i7ae6teh6qgmikds4ljg654yn2r64/11-futuristic-robots.mp4", 
         description: "Two humanoid robots futuristic setting" 
     },
     { 
         id: 12, 
         name: "Point of View", 
-        video: "https://raw.githubusercontent.com/Shakeeleth/nft-collection-arc/main/nft-videos/12-point-of-view.mp4", 
+        video: "https://gateway.pinata.cloud/ipfs/bafybeicpkt56ifv3k3w5ojukhuyd4i7ae6teh6qgmikds4ljg654yn2r64/12-point-of-view.mp4", 
         description: "First person perspective animation" 
     }
 ];
@@ -194,7 +194,7 @@ function loadNFTs() {
     nftData.forEach(nft => {
         const nftCard = `
             <div class="nft-card">
-                <video class="nft-video" controls>
+                <video class="nft-video" autoplay loop muted playsinline>
                     <source src="${nft.video}" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
