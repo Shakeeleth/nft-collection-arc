@@ -3,42 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFTCollection on ARC</title>
+    <meta name="description" content="Mint 12 unique animated NFTs on Arc Testnet • 10 EURC each • 50% Burned • Limited Supply">
+    <title>ArcNFTCollection • Animated NFTs on Arc</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
-        <h1>🎨 NFTCollection on ARC</h1>
-        <div class="wallet-section">
-            <button id="connectWallet">Connect Wallet</button>
-            <button id="disconnectWallet" style="display: none;">Disconnect</button>
-            <span id="walletInfo"></span>
+        <div class="header-top">
+            <h1>🎨 ArcNFTCollection</h1>
+            <div class="wallet-section">
+                <button id="connectWallet">Connect Wallet</button>
+                <button id="disconnectWallet" style="display: none;">Disconnect Wallet</button>
+                <span id="walletInfo"></span>
+            </div>
         </div>
+        <p class="contract-info">
+            Contract: <a href="https://testnet.arcscan.app/address/0xe78B7c61B73FE0FBa08dFCd0d413aab465d0D520" target="_blank">
+                0xe78B7c61B73FE0FBa08dFCd0d413aab465d0D520
+            </a> (Verified on ArcScan)
+        </p>
     </header>
 
     <main>
-        <div class="info-section">
-            <div class="balance-info">
-                <p>EURC Balance: <span id="eurcBalance">0</span></p>
-                <p>Total Supply: <span id="totalSupply">12000</span> | Minted: <span id="mintedCount">0</span></p>
+        <section class="stats-section">
+            <div class="stat-card">
+                <p>EURC Balance: <strong><span id="eurcBalance">0.00</span> EURC</strong></p>
+            </div>
+            <div class="stat-card">
+                <p>Total Supply: <strong><span id="mintedCount">0</span> / 12,000</strong></p>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
             </div>
-            <div class="description">
-                <h3>About Collection</h3>
-                <p>• 12 Unique Animated NFTs</p>
-                <p>• 10 EURC per NFT</p>
-                <p>• 50% of EURC Burned 🔥</p>
-                <p>• 50% to Treasury 💰</p>
-                <p>• Max 12 NFTs per wallet</p>
-            </div>
-        </div>
+        </section>
 
         <div class="nft-grid" id="nftGrid">
-            <!-- NFTs dynamically loaded here -->
+            <!-- Dynamic NFTs with skeleton loading -->
         </div>
+
+        <section class="about-section">
+            <div class="about-card">
+                <h2>About ArcNFTCollection</h2>
+                <p>A limited-edition collection of <strong>12 unique animated NFTs</strong> built exclusively on <strong>Arc Testnet</strong>. Each piece is a cyberpunk-inspired animation, crafted for the future of digital art.</p>
+                <div class="features">
+                    <div class="feature">💰 Price: 10 EURC per NFT</div>
+                    <div class="feature">🔥 50% of fees BURNED forever (scarcity boost)</div>
+                    <div class="feature">🏦 50% to Treasury for community growth</div>
+                    <div class="feature">⚡ Max 1000 mints per unique design</div>
+                    <div class="feature">👛 Wallet limit: Only 12 NFTs per address</div>
+                    <div class="feature">✅ Fully verified smart contract</div>
+                </div>
+                <p class="highlight">Animations are stored permanently on IPFS (via Pinata) for true ownership. Mint now and join the Arc revolution – fast, cheap, and future-proof!</p>
+            </div>
+        </section>
     </main>
+
+    <footer>
+        <p>Follow the journey:</p>
+        <div class="social-links">
+            <a href="https://x.com/arc" target="_blank">Arc on X</a> •
+            <a href="https://x.com/Irrfan_eth" target="_blank">Irfan on X</a> •
+            <a href="https://discord.gg/buildonarc" target="_blank">Build on Arc Discord</a>
+        </div>
+        <p class="made-by">Built with ❤️ on Arc Testnet • © 2025</p>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
     <script src="script.js"></script>
